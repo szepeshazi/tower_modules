@@ -5,4 +5,15 @@ class EffectState {
 
   final SlotValue slotValue;
   final bool locked;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EffectState &&
+          runtimeType == other.runtimeType &&
+          slotValue == other.slotValue &&
+          locked == other.locked;
+
+  @override
+  int get hashCode => slotValue.hashCode ^ locked.hashCode;
 }

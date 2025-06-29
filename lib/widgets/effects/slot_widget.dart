@@ -63,16 +63,16 @@ class SlotWidget extends StatelessWidget {
             ],
           ),
         ),
-        if (!value.locked) Positioned.fill(child: GradientFlashWidget(color: color)),
+        Positioned.fill(child: GradientFlashWidget(value: value)),
       ],
     );
   }
 }
 
 class GradientFlashWidget extends StatefulWidget {
-  const GradientFlashWidget({super.key, required this.color});
+  const GradientFlashWidget({super.key, required this.value});
 
-  final Color color;
+  final EffectState value;
 
   @override
   State<GradientFlashWidget> createState() => _GradientFlashWidgetState();
@@ -87,7 +87,10 @@ class _GradientFlashWidgetState extends State<GradientFlashWidget>
       duration: Duration(milliseconds: 200),
       vsync: this,
     );
-    animation = Tween<double>(begin: 0.0, end: 1.0 + trailLength).animate(controller);
+    animation = Tween<double>(
+      begin: 0.0,
+      end: 1.0 + trailLength,
+    ).animate(controller);
     controller
       ..addListener(() {
         setState(() {});
@@ -102,6 +105,8 @@ class _GradientFlashWidgetState extends State<GradientFlashWidget>
   Widget build(BuildContext context) {
     final head = animation.value.clamp(0.0, 1.0);
     final tail = (animation.value - trailLength).clamp(0.0, 1.0);
+    final color = ModuleColor.forRarity(widget.value.slotValue.rarity).accent;
+
     return IgnorePointer(
       child: Container(
         decoration: BoxDecoration(
@@ -109,8 +114,8 @@ class _GradientFlashWidgetState extends State<GradientFlashWidget>
             colors: [
               Color(0x00000000),
               Color(0x00000000),
-              widget.color.withAlpha(0),
-              widget.color,
+              color.withAlpha(0),
+              color,
               Color(0x00000000),
               Color(0x00000000),
             ],
@@ -124,8 +129,10 @@ class _GradientFlashWidgetState extends State<GradientFlashWidget>
 
   @override
   void didUpdateWidget(GradientFlashWidget oldWidget) {
-    controller.reset();
-    controller.forward();
+    if (oldWidget.value.slotValue != widget.value.slotValue) {
+      controller.reset();
+      controller.forward();
+    }
     super.didUpdateWidget(oldWidget);
   }
 
