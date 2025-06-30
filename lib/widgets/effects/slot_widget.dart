@@ -93,7 +93,9 @@ class _GradientFlashWidgetState extends State<GradientFlashWidget>
     ).animate(controller);
     controller
       ..addListener(() {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       })
       ..forward();
   }
@@ -130,10 +132,18 @@ class _GradientFlashWidgetState extends State<GradientFlashWidget>
   @override
   void didUpdateWidget(GradientFlashWidget oldWidget) {
     if (oldWidget.value.slotValue != widget.value.slotValue) {
-      controller.reset();
-      controller.forward();
+      if(mounted) {
+        controller.reset();
+        controller.forward();
+      }
     }
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    controller.stop(canceled: true);
+    super.dispose();
   }
 
   static const trailLength = 0.5;

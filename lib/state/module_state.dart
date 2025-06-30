@@ -7,13 +7,15 @@ class ModuleState {
     required this.module,
     required this.rarity,
     required this.level,
-    required this.effects,
+    this.effects = const [],
+    this.rerollsSpent = 0,
   });
 
   final ModuleType module;
   final Rarity rarity;
   final int level;
   final List<EffectState> effects;
+  final int rerollsSpent;
 
   @override
   bool operator ==(Object other) =>

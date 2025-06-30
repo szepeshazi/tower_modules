@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:tower_modules/model/module_spec.dart';
 import 'package:tower_modules/state/effect_state.dart';
 import 'package:tower_modules/widgets/effects/auto_reroll_widget.dart';
-import 'package:tower_modules/widgets/effects/slot_widget.dart';
 import 'package:tower_modules/widgets/effects/manual_reroll_widget.dart';
+import 'package:tower_modules/widgets/effects/reroll_cost_widget.dart';
+import 'package:tower_modules/widgets/effects/slot_widget.dart';
 
 class EffectsWidget extends StatelessWidget {
   const EffectsWidget({
@@ -39,6 +40,7 @@ class EffectsWidget extends StatelessWidget {
         ),
         SizedBox(height: 6),
         AutoRerollWidget(),
+        RerollCostWidget(),
         ManualRerollWidget(),
       ],
     );

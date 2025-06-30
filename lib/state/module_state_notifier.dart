@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -8,17 +9,23 @@ import 'package:tower_modules/state/module_state.dart';
 
 class ModuleStateNotifier extends Notifier<ModuleState> {
   ModuleStateNotifier(super.state) {
-    _initialize();
+    scheduleMicrotask(() {
+      final effects = createSlots();
+      emit(
+        ModuleState(
+          module: state.module,
+          rarity: state.rarity,
+          level: state.level,
+          effects: effects,
+        ),
+      );
+    });
   }
 
   final random = Random();
   var availableSubEffects = <Rarity, List<SlotValue>>{};
 
-  void _initialize() {
-    rollUnlockedSlots();
-  }
-
-  void removeFromAvailable(SlotValue slotValue) {
+  void _removeFromEffectPool(SlotValue slotValue) {
     for (final rarity in availableSubEffects.keys) {
       final currentEffects = availableSubEffects[rarity];
       if (currentEffects != null) {
@@ -28,13 +35,13 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     }
   }
 
-  void resetAvailableSubEffects() {
+  void _resetAvailableSubEffects() {
     availableSubEffects = Map.from(
       subEffectMatrix[state.module] ?? <Rarity, List<SlotValue>>{},
     );
     for (final effect in state.effects) {
       if (effect.locked) {
-        removeFromAvailable(effect.slotValue);
+        _removeFromEffectPool(effect.slotValue);
       }
     }
   }
@@ -43,30 +50,44 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
       moduleLevels[moduleLevels.keys.lastWhere((k) => k <= state.level)] ??
       moduleLevels.values.first;
 
-  void rollUnlockedSlots() {
-    resetAvailableSubEffects();
+  List<EffectState> createSlots() {
+    _resetAvailableSubEffects();
     final effects = <EffectState>[];
     final slots = slotCount;
+
+    for (var i = 0; i < slots; i++) {
+      final slotValue = rollSingleSlot();
+      _removeFromEffectPool(slotValue);
+      effects.add(EffectState(slotValue: slotValue, locked: false));
+    }
+    return effects;
+  }
+
+  int get currentRollCost {
+    final lockCount  = state.effects.where((e) => e.locked).length;
+    return lockCost[lockCount] ?? 10;
+  }
+
+  void rollUnlockedSlots() {
+    _resetAvailableSubEffects();
+    final effects = <EffectState>[];
     for (final effect in state.effects) {
       if (effect.locked) {
         effects.add(effect);
       } else {
         final slotValue = rollSingleSlot();
-        removeFromAvailable(slotValue);
+        _removeFromEffectPool(slotValue);
         effects.add(EffectState(slotValue: slotValue, locked: false));
       }
     }
-    for (var i = effects.length; i < slots; i++) {
-      final slotValue = rollSingleSlot();
-      removeFromAvailable(slotValue);
-      effects.add(EffectState(slotValue: slotValue, locked: false));
-    }
+
     emit(
       ModuleState(
         module: state.module,
         rarity: state.rarity,
         level: state.level,
         effects: effects,
+        rerollsSpent: state.rerollsSpent + currentRollCost,
       ),
     );
   }
@@ -79,7 +100,15 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     if (module != state.module ||
         rarity != state.rarity ||
         level != state.level) {
-      emit(defaultState);
+      final effects = createSlots();
+      emit(
+        ModuleState(
+          module: module,
+          rarity: rarity,
+          level: level,
+          effects: effects,
+        ),
+      );
     }
   }
 
@@ -89,15 +118,16 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
         module: state.module,
         rarity: state.rarity,
         level: state.level,
+        rerollsSpent: state.rerollsSpent,
         effects: [
-          for (var i = 0; i < state.effects.length; i++)
-            EffectState(
-              slotValue: state.effects[i].slotValue,
-              locked:
-                  index == i
-                      ? !state.effects[i].locked
-                      : state.effects[i].locked,
-            ),
+          for (var i = 0; i < state.effects.length; i++) ...[
+            if (i == index)
+              EffectState(
+                slotValue: state.effects[i].slotValue,
+                locked: !state.effects[i].locked,
+              ),
+            if (i != index) state.effects[i],
+          ],
         ],
       ),
     );
