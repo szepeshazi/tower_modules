@@ -38,6 +38,8 @@ enum ModuleType {
   const ModuleType(this.moduleName);
 
   final String moduleName;
+
+  String get shortName => moduleName.split(' ').first;
 }
 
 /// Percentage based chance multiplied by 1000, i.e. value of 3 means 0.3%
