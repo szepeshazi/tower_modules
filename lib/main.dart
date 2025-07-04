@@ -21,9 +21,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
           brightness: Brightness.dark,
-          background: Colors.black,
           surface: Colors.black,
-          onBackground: Colors.white,
           onSurface: Colors.white,
           primary: Colors.deepPurple,
           onPrimary: Colors.white,
@@ -33,7 +31,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
         canvasColor: Colors.black,
         cardColor: Colors.black,
-        dialogBackgroundColor: Colors.black,
+        dialogTheme: const DialogTheme(backgroundColor: Colors.black),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
@@ -45,21 +43,21 @@ class MyApp extends StatelessWidget {
           displayColor: Colors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-            textStyle: const TextStyle(color: Colors.white),
+          style: ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(Colors.black),
+            foregroundColor: WidgetStatePropertyAll(Colors.white),
+            textStyle: WidgetStatePropertyAll(TextStyle(color: Colors.white)),
           ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
+          style: ButtonStyle(
+            foregroundColor: WidgetStatePropertyAll(Colors.white),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.white,
-            side: const BorderSide(color: Colors.white),
+          style: ButtonStyle(
+            foregroundColor: WidgetStatePropertyAll(Colors.white),
+            side: WidgetStatePropertyAll(BorderSide(color: Colors.white)),
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),

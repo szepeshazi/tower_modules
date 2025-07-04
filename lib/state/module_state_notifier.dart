@@ -17,6 +17,7 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
           rarity: state.rarity,
           level: state.level,
           effects: effects,
+          showWarning: true,
         ),
       );
     });
@@ -45,6 +46,8 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
         _removeFromEffectPool(effect.slotValue);
       }
     }
+    final unavailableRarities = Rarity.values.where((r) => r.index > state.rarity.index);
+    unavailableRarities.forEach(availableSubEffects.remove);
   }
 
   bool _hasValuableEffect() {

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:tower_modules/core/notifier_builder.dart';
 import 'package:tower_modules/state/module_state.dart';
 import 'package:tower_modules/state/module_state_notifier.dart';
+import 'package:tower_modules/widgets/common/overlay_widget.dart';
 import 'package:tower_modules/widgets/module/module_icon_widget.dart';
 import 'package:tower_modules/widgets/module/module_name_widget.dart';
 import 'package:tower_modules/widgets/module/module_type_editor_widget.dart';
 import 'package:tower_modules/widgets/module/rarity_widget.dart';
 import 'package:tower_modules/widgets/module/stars_widget.dart';
-import 'package:tower_modules/widgets/overlay_widget.dart';
 
 class ModuleWidget extends StatefulWidget {
   const ModuleWidget({super.key});
@@ -98,15 +98,9 @@ class _ModuleWidgetState extends State<ModuleWidget> {
                 child: ModuleTypeEditorWidget(
                   initialType: state.module,
                   onConfirm: (_) {
-                    setState(() {
-                      _showTypeEditor = false;
-                    });
+                    _closeTypeEditor();
                   },
-                  onCancel: () {
-                    setState(() {
-                      _showTypeEditor = false;
-                    });
-                  },
+                  onCancel: _closeTypeEditor,
                 ),
               );
             },

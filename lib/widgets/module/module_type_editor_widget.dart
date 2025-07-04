@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tower_modules/model/module_colors.dart';
 import 'package:tower_modules/model/module_spec.dart';
-import 'package:tower_modules/widgets/effects/rarity_chip_widget.dart';
+import 'package:tower_modules/widgets/common/glowing_border_chip_widget.dart';
 
 class ModuleTypeEditorWidget extends StatefulWidget {
   final ModuleType initialType;
@@ -32,31 +32,13 @@ class _ModuleTypeEditorWidgetState extends State<ModuleTypeEditorWidget> {
   Widget build(BuildContext context) {
     final baseColor = ModuleColor.forRarity(Rarity.rare).base;
     final accentColor = ModuleColor.forRarity(Rarity.rare).accent;
-    final colorWheel = [
-      baseColor.withAlpha(100),
-      baseColor,
-      Colors.white,
-      Colors.white,
-      accentColor,
-      baseColor,
-      baseColor.withAlpha(100),
-    ];
-
     final selectedBaseColor = ModuleColor.forRarity(Rarity.ancestral).base;
     final selectedAccentColor = ModuleColor.forRarity(Rarity.ancestral).accent;
-    final selectedColorWheel = [
-      selectedBaseColor.withAlpha(100),
-      selectedBaseColor,
-      Colors.white,
-      Colors.white,
-      selectedAccentColor,
-      selectedBaseColor,
-      selectedBaseColor.withAlpha(100),
-    ];
 
     final style = Theme.of(
       context,
     ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w900);
+
     return Material(
       child: Center(
         child: Container(
@@ -79,14 +61,15 @@ class _ModuleTypeEditorWidgetState extends State<ModuleTypeEditorWidget> {
                 runSpacing: 12,
                 children: [
                   ...ModuleType.values.map((type) {
-                    return CustomPaint(
-                      painter: GlowingBorderPainter(
-                        colorWheel:
-                            _selectedType == type
-                                ? selectedColorWheel
-                                : colorWheel,
-                        borderRadius: 4,
-                      ),
+                    return GlowingBorderChipWidget(
+                      baseColor:
+                          _selectedType == type ? selectedBaseColor : baseColor,
+                      accentColor:
+                          _selectedType == type
+                              ? selectedAccentColor
+                              : accentColor,
+                      borderRadius: 4,
+
                       child: Padding(
                         padding: EdgeInsets.all(4),
                         child: Material(

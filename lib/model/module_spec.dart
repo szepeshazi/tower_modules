@@ -143,7 +143,7 @@ enum SubEffect {
   ilmq(name: 'Inner Land Mines - Quantity'),
   ilmc(name: 'Inner Land Mines - Cooldown', unit: Unit.seconds),
   psd(name: 'Poison Swamp - Damage', unit: Unit.multiplier),
-  psqu(name: 'Poison Swamp - Duration', unit: Unit.seconds),
+  psdu(name: 'Poison Swamp - Duration', unit: Unit.seconds),
   psc(name: 'Poison Swamp - Cooldown', unit: Unit.seconds),
   cld(name: 'Chain Lightning - Damage', unit: Unit.multiplier),
   clq(name: 'Chain Lightning - Quantity'),
@@ -597,7 +597,7 @@ const subEffectMatrix = <ModuleType, Map<Rarity, List<SlotValue>>>{
         negative: true,
       ),
       SlotValue(effect: SubEffect.psd, rarity: Rarity.legendary, bonus: '50'),
-      SlotValue(effect: SubEffect.psqu, rarity: Rarity.legendary, bonus: '2'),
+      SlotValue(effect: SubEffect.psdu, rarity: Rarity.legendary, bonus: '2'),
       SlotValue(
         effect: SubEffect.psc,
         rarity: Rarity.legendary,
@@ -660,7 +660,7 @@ const subEffectMatrix = <ModuleType, Map<Rarity, List<SlotValue>>>{
         negative: true,
       ),
       SlotValue(effect: SubEffect.psd, rarity: Rarity.mythic, bonus: '100'),
-      SlotValue(effect: SubEffect.psqu, rarity: Rarity.mythic, bonus: '5'),
+      SlotValue(effect: SubEffect.psdu, rarity: Rarity.mythic, bonus: '5'),
       SlotValue(
         effect: SubEffect.psc,
         rarity: Rarity.mythic,
@@ -685,7 +685,7 @@ const subEffectMatrix = <ModuleType, Map<Rarity, List<SlotValue>>>{
       SlotValue(
         effect: SubEffect.bhc,
         rarity: Rarity.ancestral,
-        bonus: '-4',
+        bonus: '4',
         negative: true,
       ),
       SlotValue(effect: SubEffect.slb, rarity: Rarity.ancestral, bonus: '20'),
@@ -723,7 +723,7 @@ const subEffectMatrix = <ModuleType, Map<Rarity, List<SlotValue>>>{
         negative: true,
       ),
       SlotValue(effect: SubEffect.psd, rarity: Rarity.ancestral, bonus: '250'),
-      SlotValue(effect: SubEffect.psqu, rarity: Rarity.ancestral, bonus: '10'),
+      SlotValue(effect: SubEffect.psdu, rarity: Rarity.ancestral, bonus: '10'),
       SlotValue(
         effect: SubEffect.psc,
         rarity: Rarity.ancestral,
