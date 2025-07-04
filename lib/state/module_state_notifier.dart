@@ -24,6 +24,7 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
 
   final random = Random();
   var availableSubEffects = <Rarity, List<SlotValue>>{};
+  int effectsHash = 0;
 
   void _removeFromEffectPool(SlotValue slotValue) {
     for (final rarity in availableSubEffects.keys) {
@@ -46,6 +47,13 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     }
   }
 
+  bool _hasValuableEffect() {
+    final unlocked = state.effects.firstWhereOrNull(
+      (e) => !e.locked && e.slotValue.rarity.index >= Rarity.mythic.index,
+    );
+    return unlocked != null;
+  }
+
   int get slotCount =>
       moduleLevels[moduleLevels.keys.lastWhere((k) => k <= state.level)] ??
       moduleLevels.values.first;
@@ -64,11 +72,25 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
   }
 
   int get currentRollCost {
-    final lockCount  = state.effects.where((e) => e.locked).length;
+    final lockCount = state.effects.where((e) => e.locked).length;
     return lockCost[lockCount] ?? 10;
   }
 
+  void skipEffectCheck() {
+    effectsHash = state.effects.hashCode;
+    rollUnlockedSlots();
+  }
+
+  void dismissWarningDialog() {
+    emit(state.copyWith(showWarning: false));
+  }
+
   void rollUnlockedSlots() {
+    if (effectsHash != state.effects.hashCode && _hasValuableEffect()) {
+      emit(state.copyWith(showWarning: true));
+      return;
+    }
+    effectsHash = 0;
     _resetAvailableSubEffects();
     final effects = <EffectState>[];
     for (final effect in state.effects) {
@@ -82,12 +104,10 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     }
 
     emit(
-      ModuleState(
-        module: state.module,
-        rarity: state.rarity,
-        level: state.level,
+      state.copyWith(
         effects: effects,
         rerollsSpent: state.rerollsSpent + currentRollCost,
+        showWarning: false,
       ),
     );
   }
@@ -114,11 +134,7 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
 
   void toggleLock(int index) {
     emit(
-      ModuleState(
-        module: state.module,
-        rarity: state.rarity,
-        level: state.level,
-        rerollsSpent: state.rerollsSpent,
+      state.copyWith(
         effects: [
           for (var i = 0; i < state.effects.length; i++) ...[
             if (i == index)
