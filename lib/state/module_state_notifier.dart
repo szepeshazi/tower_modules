@@ -17,15 +17,29 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
           rarity: state.rarity,
           level: state.level,
           effects: effects,
-          showWarning: true,
         ),
       );
+      _module = state.module;
+      _rarity = state.rarity;
+      _level = state.level;
     });
   }
 
   final random = Random();
   var availableSubEffects = <Rarity, List<SlotValue>>{};
   int effectsHash = 0;
+
+  late ModuleType _module;
+  late Rarity _rarity;
+  late int _level;
+
+  @override
+  void emit(ModuleState newValue) {
+    super.emit(newValue);
+    _module = state.module;
+    _rarity = state.rarity;
+    _level = state.level;
+  }
 
   void _removeFromEffectPool(SlotValue slotValue) {
     for (final rarity in availableSubEffects.keys) {
@@ -46,7 +60,9 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
         _removeFromEffectPool(effect.slotValue);
       }
     }
-    final unavailableRarities = Rarity.values.where((r) => r.index > state.rarity.index);
+    final unavailableRarities = Rarity.values.where(
+      (r) => r.index > state.rarity.index,
+    );
     unavailableRarities.forEach(availableSubEffects.remove);
   }
 
@@ -171,15 +187,5 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     module: ModuleType.core,
     rarity: Rarity.ancestral3s,
     level: 250,
-    effects: [
-      EffectState(
-        slotValue: SlotValue(
-          effect: SubEffect.dwq,
-          rarity: Rarity.ancestral,
-          bonus: '3',
-        ),
-        locked: false,
-      ),
-    ],
   );
 }

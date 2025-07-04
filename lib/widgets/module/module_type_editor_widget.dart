@@ -1,32 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:tower_modules/core/notifier_builder.dart';
+import 'package:tower_modules/core/vault.dart';
 import 'package:tower_modules/model/module_colors.dart';
 import 'package:tower_modules/model/module_spec.dart';
+import 'package:tower_modules/state/module_editor_state.dart';
+import 'package:tower_modules/state/module_editor_state_notifier.dart';
+import 'package:tower_modules/state/module_state_notifier.dart';
 import 'package:tower_modules/widgets/common/glowing_border_chip_widget.dart';
 
-class ModuleTypeEditorWidget extends StatefulWidget {
-  final ModuleType initialType;
-  final void Function(ModuleType?) onConfirm;
-  final VoidCallback onCancel;
+class ModuleTypeEditorWidget extends StatelessWidget {
+  const ModuleTypeEditorWidget({required this.vault, super.key});
 
-  const ModuleTypeEditorWidget({
-    super.key,
-    required this.initialType,
-    required this.onConfirm,
-    required this.onCancel,
-  });
-
-  @override
-  State<ModuleTypeEditorWidget> createState() => _ModuleTypeEditorWidgetState();
-}
-
-class _ModuleTypeEditorWidgetState extends State<ModuleTypeEditorWidget> {
-  ModuleType? _selectedType;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedType = widget.initialType;
-  }
+  final Vault vault;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +23,9 @@ class _ModuleTypeEditorWidgetState extends State<ModuleTypeEditorWidget> {
     final style = Theme.of(
       context,
     ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w900);
+
+    final editorBloc = vault.get<ModuleEditorStateNotifier>();
+    final moduleBloc = vault.get<ModuleStateNotifier>();
 
     return Material(
       child: Center(
@@ -56,62 +44,80 @@ class _ModuleTypeEditorWidgetState extends State<ModuleTypeEditorWidget> {
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  ...ModuleType.values.map((type) {
-                    return GlowingBorderChipWidget(
-                      baseColor:
-                          _selectedType == type ? selectedBaseColor : baseColor,
-                      accentColor:
-                          _selectedType == type
-                              ? selectedAccentColor
-                              : accentColor,
-                      borderRadius: 4,
+              NotifierBuilder<ModuleEditorStateNotifier, ModuleEditorState>(
+                resolver: vault.get<ModuleEditorStateNotifier>,
+                selector: (state) => state.module,
+                builder: (context, state, child) {
+                  return Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      ...ModuleType.values.map((module) {
+                        return GlowingBorderChipWidget(
+                          baseColor:
+                              state.module == module
+                                  ? selectedBaseColor
+                                  : baseColor,
+                          accentColor:
+                              state.module == module
+                                  ? selectedAccentColor
+                                  : accentColor,
+                          borderRadius: 4,
 
-                      child: Padding(
-                        padding: EdgeInsets.all(4),
-                        child: Material(
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                _selectedType = type;
-                              });
-                            },
-                            child: SizedBox(
-                              width: 100,
-                              height: 32,
-                              child: Center(
-                                child: Text(
-                                  type.shortName,
-                                  style: style?.copyWith(
-                                    color:
-                                        _selectedType == type
-                                            ? selectedAccentColor
-                                            : Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(4),
+                            child: Material(
+                              child: InkWell(
+                                onTap: () => editorBloc.setModule(module),
+                                child: SizedBox(
+                                  width: 100,
+                                  height: 32,
+                                  child: Center(
+                                    child: Text(
+                                      module.shortName,
+                                      style: style?.copyWith(
+                                        color:
+                                            module == state.module
+                                                ? selectedAccentColor
+                                                : Colors.white,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    );
-                  }),
-                ],
+                        );
+                      }),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: widget.onCancel,
+                    onPressed: editorBloc.hide,
                     child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
-                    onPressed: () => widget.onConfirm(_selectedType),
+                    onPressed: () {
+                      final module = editorBloc.state.module;
+                      final rarity = editorBloc.state.rarity;
+                      final level = editorBloc.state.level;
+                      final valid =
+                          module != null && rarity != null && level != null;
+                      if (valid) {
+                        moduleBloc.updateModule(
+                          module: module,
+                          rarity: rarity,
+                          level: level,
+                        );
+                      }
+                      editorBloc.hide();
+                    },
                     child: const Text('Confirm'),
                   ),
                 ],

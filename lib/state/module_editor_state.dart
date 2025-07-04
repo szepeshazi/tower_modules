@@ -2,15 +2,15 @@ import 'package:tower_modules/model/module_spec.dart';
 
 class ModuleEditorState {
   const ModuleEditorState({
-    required this.module,
-    required this.rarity,
-    required this.level,
+    this.module,
+    this.rarity,
+    this.level,
     this.visible = false,
   });
 
-  final ModuleType module;
-  final Rarity rarity;
-  final int level;
+  final ModuleType? module;
+  final Rarity? rarity;
+  final int? level;
   final bool visible;
 
   ModuleEditorState copyWith({

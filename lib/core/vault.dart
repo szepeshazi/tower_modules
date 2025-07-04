@@ -1,3 +1,5 @@
+import 'package:tower_modules/state/module_editor_state.dart';
+import 'package:tower_modules/state/module_editor_state_notifier.dart';
 import 'package:tower_modules/state/module_state_notifier.dart';
 
 class VaultException implements Exception {
@@ -14,7 +16,13 @@ class Vault {
 
   factory Vault.registerAll() {
     final vault = Vault._();
-    vault.add<ModuleStateNotifier>(ModuleStateNotifier(ModuleStateNotifier.defaultState));
+    vault
+      ..add<ModuleStateNotifier>(
+        ModuleStateNotifier(ModuleStateNotifier.defaultState),
+      )
+      ..add<ModuleEditorStateNotifier>(
+        ModuleEditorStateNotifier(ModuleEditorState()),
+      );
     return vault;
   }
 

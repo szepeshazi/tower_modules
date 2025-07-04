@@ -9,7 +9,7 @@ class Notifier<T> {
 
   Subscription<T> listen(
     void Function(T value) callback, {
-    Object Function(T value)? selector,
+    Object? Function(T value)? selector,
     bool triggerImmediately = false,
   }) {
     if (triggerImmediately) {
@@ -48,7 +48,7 @@ class Subscription<T> {
 
   final void Function(T value) callback;
   final Notifier<T> parent;
-  Object Function(T value)? selector;
+  Object? Function(T value)? selector;
 
   void cancel() {
     parent.remove(this);
