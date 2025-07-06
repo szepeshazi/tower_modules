@@ -18,7 +18,7 @@ class Vault {
     final vault = Vault._();
     vault
       ..add<ModuleStateNotifier>(
-        ModuleStateNotifier(ModuleStateNotifier.defaultState),
+        ModuleStateNotifier(),
       )
       ..add<ModuleEditorStateNotifier>(
         ModuleEditorStateNotifier(ModuleEditorState()),

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -8,21 +7,19 @@ import 'package:tower_modules/state/effect_state.dart';
 import 'package:tower_modules/state/module_state.dart';
 
 class ModuleStateNotifier extends Notifier<ModuleState> {
-  ModuleStateNotifier(super.state) {
-    scheduleMicrotask(() {
-      _module = state.module;
-      _rarity = state.rarity;
-      _level = state.level;
-      _effects = createSlots();
-      emit(
-        ModuleState(
-          module: _module,
-          rarity: _rarity,
-          level: _level,
-          effects: _effects,
-        ),
-      );
-    });
+  ModuleStateNotifier() {
+    _module = ModuleType.core;
+    _rarity = Rarity.ancestral3s;
+    _level = 250;
+    _effects = createSlots();
+    setInitialState(
+      ModuleState(
+        module: _module,
+        rarity: _rarity,
+        level: _level,
+        effects: _effects,
+      ),
+    );
   }
 
   final random = Random();
@@ -185,10 +182,4 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     final index = random.nextInt(effectList.length);
     return effectList[index];
   }
-
-  static const defaultState = ModuleState(
-    module: ModuleType.core,
-    rarity: Rarity.ancestral3s,
-    level: 250,
-  );
 }

@@ -1,7 +1,11 @@
 class Notifier<T> {
-  Notifier(this._state);
+  Notifier([T? initialState]) {
+    if (initialState != null) {
+      _state = initialState;
+    }
+  }
 
-  T _state;
+  late T _state;
 
   T get state => _state;
 
@@ -19,6 +23,11 @@ class Notifier<T> {
     subscriptions.add(sub);
     return sub;
   }
+
+  void setInitialState(T value) {
+    _state = value;
+  }
+
 
   void emit(T newValue) {
     if (newValue == _state) {
