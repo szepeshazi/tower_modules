@@ -10,18 +10,18 @@ import 'package:tower_modules/state/module_state.dart';
 class ModuleStateNotifier extends Notifier<ModuleState> {
   ModuleStateNotifier(super.state) {
     scheduleMicrotask(() {
-      final effects = createSlots();
-      emit(
-        ModuleState(
-          module: state.module,
-          rarity: state.rarity,
-          level: state.level,
-          effects: effects,
-        ),
-      );
       _module = state.module;
       _rarity = state.rarity;
       _level = state.level;
+      _effects = createSlots();
+      emit(
+        ModuleState(
+          module: _module,
+          rarity: _rarity,
+          level: _level,
+          effects: _effects,
+        ),
+      );
     });
   }
 
@@ -32,13 +32,15 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
   late ModuleType _module;
   late Rarity _rarity;
   late int _level;
+  late List<EffectState> _effects = [];
 
   @override
   void emit(ModuleState newValue) {
+    _module = newValue.module;
+    _rarity = newValue.rarity;
+    _level = newValue.level;
+    _effects = newValue.effects;
     super.emit(newValue);
-    _module = state.module;
-    _rarity = state.rarity;
-    _level = state.level;
   }
 
   void _removeFromEffectPool(SlotValue slotValue) {
@@ -53,50 +55,50 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
 
   void _resetAvailableSubEffects() {
     availableSubEffects = Map.from(
-      subEffectMatrix[state.module] ?? <Rarity, List<SlotValue>>{},
+      subEffectMatrix[_module] ?? <Rarity, List<SlotValue>>{},
     );
-    for (final effect in state.effects) {
+    for (final effect in _effects) {
       if (effect.locked) {
         _removeFromEffectPool(effect.slotValue);
       }
     }
     final unavailableRarities = Rarity.values.where(
-      (r) => r.index > state.rarity.index,
+      (r) => r.index > _rarity.index,
     );
     unavailableRarities.forEach(availableSubEffects.remove);
   }
 
   bool _hasValuableEffect() {
-    final unlocked = state.effects.firstWhereOrNull(
+    final unlocked = _effects.firstWhereOrNull(
       (e) => !e.locked && e.slotValue.rarity.index >= Rarity.mythic.index,
     );
     return unlocked != null;
   }
 
   int get slotCount =>
-      moduleLevels[moduleLevels.keys.lastWhere((k) => k <= state.level)] ??
+      moduleLevels[moduleLevels.keys.lastWhere((k) => k <= _level)] ??
       moduleLevels.values.first;
 
   List<EffectState> createSlots() {
+    _effects = <EffectState>[];
     _resetAvailableSubEffects();
-    final effects = <EffectState>[];
     final slots = slotCount;
 
     for (var i = 0; i < slots; i++) {
       final slotValue = rollSingleSlot();
       _removeFromEffectPool(slotValue);
-      effects.add(EffectState(slotValue: slotValue, locked: false));
+      _effects.add(EffectState(slotValue: slotValue, locked: false));
     }
-    return effects;
+    return _effects;
   }
 
   int get currentRollCost {
-    final lockCount = state.effects.where((e) => e.locked).length;
+    final lockCount = _effects.where((e) => e.locked).length;
     return lockCost[lockCount] ?? 10;
   }
 
   void skipEffectCheck() {
-    effectsHash = state.effects.hashCode;
+    effectsHash = _effects.hashCode;
     rollUnlockedSlots();
   }
 
@@ -105,26 +107,27 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
   }
 
   void rollUnlockedSlots() {
-    if (effectsHash != state.effects.hashCode && _hasValuableEffect()) {
+    if (effectsHash != _effects.hashCode && _hasValuableEffect()) {
       emit(state.copyWith(showWarning: true));
       return;
     }
     effectsHash = 0;
     _resetAvailableSubEffects();
-    final effects = <EffectState>[];
-    for (final effect in state.effects) {
+    final newEffects = <EffectState>[];
+    for (final effect in _effects) {
       if (effect.locked) {
-        effects.add(effect);
+        newEffects.add(effect);
       } else {
         final slotValue = rollSingleSlot();
         _removeFromEffectPool(slotValue);
-        effects.add(EffectState(slotValue: slotValue, locked: false));
+        newEffects.add(EffectState(slotValue: slotValue, locked: false));
       }
     }
 
+    _effects = newEffects;
     emit(
       state.copyWith(
-        effects: effects,
+        effects: _effects,
         rerollsSpent: state.rerollsSpent + currentRollCost,
         showWarning: false,
       ),
@@ -139,33 +142,33 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     if (module != state.module ||
         rarity != state.rarity ||
         level != state.level) {
-      final effects = createSlots();
+      _module = module;
+      _rarity = rarity;
+      _level = level;
+      _effects = createSlots();
       emit(
         ModuleState(
-          module: module,
-          rarity: rarity,
-          level: level,
-          effects: effects,
+          module: _module,
+          rarity: _rarity,
+          level: _level,
+          effects: _effects,
         ),
       );
     }
   }
 
   void toggleLock(int index) {
-    emit(
-      state.copyWith(
-        effects: [
-          for (var i = 0; i < state.effects.length; i++) ...[
-            if (i == index)
-              EffectState(
-                slotValue: state.effects[i].slotValue,
-                locked: !state.effects[i].locked,
-              ),
-            if (i != index) state.effects[i],
-          ],
-        ],
-      ),
-    );
+    _effects = [
+      for (var i = 0; i < _effects.length; i++) ...[
+        if (i == index)
+          EffectState(
+            slotValue: _effects[i].slotValue,
+            locked: !_effects[i].locked,
+          ),
+        if (i != index) _effects[i],
+      ],
+    ];
+    emit(state.copyWith(effects: _effects));
   }
 
   SlotValue rollSingleSlot() {

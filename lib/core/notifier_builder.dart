@@ -28,8 +28,7 @@ class NotifierBuilder<T extends Notifier<S>, S> extends StatefulWidget {
 class _NotifierBuilderState<T extends Notifier<S>, S>
     extends State<NotifierBuilder<T, S>> {
   late S _state;
-  late Subscription? subscription;
-  bool subscribed = false;
+  Subscription? subscription;
 
   @override
   void initState() {
@@ -47,7 +46,6 @@ class _NotifierBuilderState<T extends Notifier<S>, S>
         _state = value;
       });
     });
-    subscribed = true;
   }
 
   @override
@@ -57,17 +55,23 @@ class _NotifierBuilderState<T extends Notifier<S>, S>
 
   @override
   void didChangeDependencies() {
-    if (widget.resolver == null && !subscribed) {
-      _subscribe(() => context.get<T>());
-      subscribed = true;
-    }
     super.didChangeDependencies();
+    subscription?.cancel();
+    final resolver = widget.resolver ?? () => context.get<T>();
+    _subscribe(resolver);
+  }
+
+  @override
+  void didUpdateWidget(covariant NotifierBuilder<T, S> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    subscription?.cancel();
+    final resolver = widget.resolver ?? () => context.get<T>();
+    _subscribe(resolver);
   }
 
   @override
   void dispose() {
-    super.dispose();
-    subscribed = false;
     subscription?.cancel();
+    super.dispose();
   }
 }
