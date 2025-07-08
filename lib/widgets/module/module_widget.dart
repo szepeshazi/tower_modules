@@ -9,7 +9,7 @@ import 'package:tower_modules/widgets/common/overlay_widget.dart';
 import 'package:tower_modules/widgets/module/module_icon_widget.dart';
 import 'package:tower_modules/widgets/module/module_level_widget.dart';
 import 'package:tower_modules/widgets/module/module_name_widget.dart';
-import 'package:tower_modules/widgets/module/editor/module_type_editor_widget.dart';
+import 'package:tower_modules/widgets/module/editor/module_editor_widget.dart';
 import 'package:tower_modules/widgets/module/rarity_widget.dart';
 import 'package:tower_modules/widgets/module/stars_widget.dart';
 
