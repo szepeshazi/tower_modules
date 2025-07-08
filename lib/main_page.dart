@@ -4,7 +4,6 @@ import 'package:tower_modules/core/vault_provider.dart';
 import 'package:tower_modules/state/module_state.dart';
 import 'package:tower_modules/state/module_state_notifier.dart';
 import 'package:tower_modules/widgets/effects/unlocked_effect_warning_widget.dart';
-import 'package:tower_modules/widgets/module/module_level_widget.dart';
 import 'package:tower_modules/widgets/module/module_widget.dart';
 
 import 'widgets/effects/effects_widget.dart';
@@ -26,34 +25,17 @@ class MainPageWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ModuleWidget(),
-
-                Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: NotifierBuilder<ModuleStateNotifier, ModuleState>(
-                    selector: (state) => state.level,
-                    builder: (BuildContext context, state, Widget? child) {
-                      return ModuleLevelWidget(
-                        currentLevel: state.level,
-                        maxLevel: state.level,
-                      );
-                    },
-                  ),
-                ),
-
                 NotifierBuilder<ModuleStateNotifier, ModuleState>(
+                  selector: (state) => state.effects,
                   builder: (BuildContext context, state, Widget? child) {
-                    return EffectsWidget(
-                      module: state.module,
-                      rarity: state.rarity,
-                      currentLevel: state.level,
-                      slots: state.effects,
-                    );
+                    return EffectsWidget(slots: state.effects);
                   },
                 ),
               ],
             ),
           ),
           NotifierBuilder<ModuleStateNotifier, ModuleState>(
+            selector: (state) => state.showWarning,
             builder: (BuildContext context, state, Widget? child) {
               if (!state.showWarning) {
                 return SizedBox.shrink();

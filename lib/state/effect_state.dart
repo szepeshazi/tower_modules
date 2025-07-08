@@ -16,4 +16,9 @@ class EffectState {
 
   @override
   int get hashCode => slotValue.hashCode ^ locked.hashCode;
+
+  @override
+  String toString() {
+    return 'Slot: ${slotValue.effect}}';
+  }
 }
