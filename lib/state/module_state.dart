@@ -10,6 +10,7 @@ class ModuleState {
     this.effects = const [],
     this.rerollsSpent = 0,
     this.showWarning = false,
+    this.isAutoRollActive = false,
   });
 
   final ModuleType module;
@@ -18,6 +19,7 @@ class ModuleState {
   final List<EffectState> effects;
   final int rerollsSpent;
   final bool showWarning;
+  final bool isAutoRollActive;
 
   ModuleState copyWith({
     ModuleType? module,
@@ -26,6 +28,7 @@ class ModuleState {
     List<EffectState>? effects,
     int? rerollsSpent,
     bool? showWarning,
+    bool? isAutoRollActive,
   }) => ModuleState(
     module: module ?? this.module,
     rarity: rarity ?? this.rarity,
@@ -33,6 +36,7 @@ class ModuleState {
     effects: effects ?? this.effects,
     rerollsSpent: rerollsSpent ?? this.rerollsSpent,
     showWarning: showWarning ?? this.showWarning,
+    isAutoRollActive: isAutoRollActive ?? this.isAutoRollActive,
   );
 
   @override
@@ -45,7 +49,8 @@ class ModuleState {
           level == other.level &&
           effects == other.effects &&
           rerollsSpent == other.rerollsSpent &&
-          showWarning == other.showWarning;
+          showWarning == other.showWarning &&
+          isAutoRollActive == other.isAutoRollActive;
 
   @override
   int get hashCode =>
@@ -54,7 +59,8 @@ class ModuleState {
       level.hashCode ^
       effects.hashCode ^
       rerollsSpent.hashCode ^
-      showWarning.hashCode;
+      showWarning.hashCode ^
+      isAutoRollActive.hashCode;
 
   static const listEquality = ListEquality<EffectState>();
 }

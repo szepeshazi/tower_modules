@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:tower_modules/core/notifier.dart';
+import 'package:tower_modules/model/autoroll_selection.dart';
 import 'package:tower_modules/model/module_spec.dart';
 import 'package:tower_modules/state/effect_state.dart';
 import 'package:tower_modules/state/module_state.dart';
@@ -12,6 +14,13 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     _rarity = Rarity.ancestral3s;
     _level = 250;
     _effects = createSlots();
+    _autoRollSelection = AutoRollSelection(
+      rarities: [Rarity.ancestral],
+      effects:
+          (subEffectMatrix[_module]?[Rarity.ancestral] ?? [])
+              .map((sub) => sub.effect)
+              .toList(),
+    );
     setInitialState(
       ModuleState(
         module: _module,
@@ -30,6 +39,10 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
   late Rarity _rarity;
   late int _level;
   late List<EffectState> _effects = [];
+  late AutoRollSelection _autoRollSelection;
+  int _autoRollDelayIndex = 0;
+
+  AutoRollSelection get autoRollSelection => _autoRollSelection;
 
   @override
   void emit(ModuleState newValue) {
@@ -104,7 +117,9 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
   }
 
   void rollUnlockedSlots() {
-    if (effectsHash != _effects.hashCode && _hasValuableEffect()) {
+    if (!state.isAutoRollActive &&
+        effectsHash != _effects.hashCode &&
+        _hasValuableEffect()) {
       emit(state.copyWith(showWarning: true));
       return;
     }
@@ -143,6 +158,13 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
       _rarity = rarity;
       _level = level;
       _effects = createSlots();
+      _autoRollSelection = AutoRollSelection(
+        rarities: [Rarity.ancestral],
+        effects:
+        (subEffectMatrix[_module]?[Rarity.ancestral] ?? [])
+            .map((sub) => sub.effect)
+            .toList(),
+      );
       emit(
         ModuleState(
           module: _module,
@@ -168,6 +190,37 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     emit(state.copyWith(effects: _effects));
   }
 
+  Future<void> startAutoRoll() async {
+    emit(state.copyWith(isAutoRollActive: true));
+    while (state.isAutoRollActive) {
+      await Future<void>.delayed(_autoRollDelays[_autoRollDelayIndex]);
+      if (_autoRollDelayIndex < _autoRollDelays.length - 1) {
+        _autoRollDelayIndex++;
+      }
+      rollUnlockedSlots();
+      if (shouldStopAutoRoll()) {
+        stopAutoRoll();
+      }
+    }
+  }
+
+  void stopAutoRoll() {
+    emit(state.copyWith(isAutoRollActive: false));
+  }
+
+  bool shouldStopAutoRoll() {
+    final rarityMet = _effects
+        .where((e) => !e.locked)
+        .map((e) => e.slotValue.rarity)
+        .any((r) => _autoRollSelection.rarities.contains(r));
+    final effectMet = _effects
+        .where((e) => !e.locked)
+        .map((e) => e.slotValue.effect)
+        .any((se) => _autoRollSelection.effects.contains(se));
+
+    return rarityMet && effectMet;
+  }
+
   SlotValue rollSingleSlot() {
     var effectList = <SlotValue>[];
     while (effectList.isEmpty) {
@@ -182,4 +235,12 @@ class ModuleStateNotifier extends Notifier<ModuleState> {
     final index = random.nextInt(effectList.length);
     return effectList[index];
   }
+
+  static const _autoRollDelays = [
+    Duration(milliseconds: 800),
+    Duration(milliseconds: 650),
+    Duration(milliseconds: 400),
+    Duration(milliseconds: 300),
+    Duration(milliseconds: 200),
+  ];
 }
